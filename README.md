@@ -11,6 +11,7 @@ The following quickstart templates deploy this resource type depends on your nee
 |  **Create Azure IoT Central Connected logistics Application** | <a href="https://apps.azureiotcentral.com/build/new/connected-logistics" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/></a>|
 |  **Create Azure IoT Central Digital distribution center Application** | <a href="https://apps.azureiotcentral.com/build/new/digital-distribution" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/></a>|
 |  **Create Azure IoT Central In-store analytics – condition monitoring Application** | <a href="https://apps.azureiotcentral.com/build/new/in-store-analytics-condition" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/></a>|
-
+|  **Create Azure IoT Central In-store analytics – checkout Application** | <a href="https://apps.azureiotcentral.com/build/new/in-store-analytics-checkout" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/></a>|
+|  **Create Azure IoT Central Smart inventory management Application** | <a href="https://apps.azureiotcentral.com/build/new/smart-inventory" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/></a>|
 
 
