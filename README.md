@@ -1,7 +1,7 @@
 # Azure-IoT-Labs
 Core repo for IoT
 
-The following quickstart templates deploy this resource type depends on your need.
+The following quickstart templates deploys Azure IoT Cnetral resource type depends on your need.
 
  
 
