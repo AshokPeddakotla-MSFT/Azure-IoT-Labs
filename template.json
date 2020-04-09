@@ -1,147 +1,123 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "IotHubs_ashoktestiothub_connectionString": {
-            "type": "SecureString"
+        "hubname": {
+            "type": "string"
         },
-        "IotHubs_ashoktestiothub_containerName": {
-            "type": "SecureString"
+        "location": {
+            "type": "string"
         },
-        "IotHubs_ashoktestiothub_name": {
-            "defaultValue": "ashoktestiothub",
-            "type": "String"
+        "sku_name": {
+            "type": "string"
+        },
+        "sku_units": {
+            "type": "string"
+        },
+        "d2c_partitions": {
+            "type": "string"
+        },
+        "features": {
+            "type": "string"
+        },
+        "tags": {
+            "type": "object"
+        },
+        "cloudEnvironment": {
+            "type": "string",
+            "metadata": {
+                "description": "Cloud environment to deploy (i.e. usgov/china/ ...)"
+            },
+            "allowedValues": [
+                "public",
+                "china",
+                "usgov"
+            ],
+            "defaultValue": "public"
         }
     },
-    "variables": {},
+    "variables": {
+        "cloudEnvironmentSettings": {
+            "public": {
+                "nonDefaultRegionList": "eastasia, southeastasia, centralus, eastus, eastus2, westus, northcentralus, southcentralus, japanwest, japaneast, brazilsouth, australiaeast, australiasoutheast, southindia, centralindia, westindia, canadacentral, canadaeast, westcentralus, westus2, koreacentral, koreasouth, australiacentral, australiacentral2, uaecentral, uaenorth, southafricanorth, southafricawest",
+                "nonDefaultFallbackRegion": "eastus",
+                "defaultFallbackRegion": "westeurope"
+            },
+            "china": {
+                "nonDefaultRegionList": "",
+                "nonDefaultFallbackRegion": "",
+                "defaultFallbackRegion": "chinaeast2"
+            },
+            "usgov": {
+                "nonDefaultRegionList": "",
+                "nonDefaultFallbackRegion": "",
+                "defaultFallbackRegion": "usgovvirginia"
+            }
+        },
+        "logAnalyticsLocationsArray": "[providers('Microsoft.OperationalInsights', 'workspaces').locations]",
+        "logAnalyticsLocationsString": "[toLower(replace(string(variables('logAnalyticsLocationsArray')), '\"', ''))]",
+        "cleanedLogAnalyticsLocationString": "[substring(variables('logAnalyticsLocationsString'), 1, sub(length(variables('logAnalyticsLocationsString')), 2))]",
+        "logAnalyticsNormalizedLocationsString": "[replace(variables('cleanedLogAnalyticsLocationString'), ' ', '')]",
+        "normalizedLocation": "[toLower(replace(parameters('location'), ' ', ''))]",
+        "nonDefaultFallbackRegion": "[variables('cloudEnvironmentSettings')[parameters('cloudEnvironment')].nonDefaultFallbackRegion]",
+        "defaultFallbackRegion": "[variables('cloudEnvironmentSettings')[parameters('cloudEnvironment')].defaultFallbackRegion]",
+        "nonDefaultRegionList": "[variables('cloudEnvironmentSettings')[parameters('cloudEnvironment')].nonDefaultRegionList]",
+        "workspaceRegion": "[if(contains(variables('logAnalyticsNormalizedLocationsString'), variables('normalizedLocation')), variables('normalizedLocation'), if(contains(variables('nonDefaultRegionList'), variables('normalizedLocation')), variables('nonDefaultFallbackRegion'), variables('defaultFallbackRegion')))]"
+    },
     "resources": [
         {
+            "apiVersion": "2020-03-01",
             "type": "Microsoft.Devices/IotHubs",
-            "apiVersion": "2019-11-04",
-            "name": "[parameters('IotHubs_ashoktestiothub_name')]",
-            "location": "westus",
-            "tags": {
-                "CreatedBy": "aspeddak@microsoft.com",
-                "CreatedDate": "11/19/2019 4:39:24 AM",
-                "OwningTeam": "IOT",
-                "Reason": "Lab"
-            },
-            "sku": {
-                "name": "S1",
-                "tier": "Standard",
-                "capacity": 1
-            },
+            "name": "[parameters('hubname')]",
+            "location": "[parameters('location')]",
             "properties": {
-                "ipFilterRules": [],
                 "eventHubEndpoints": {
                     "events": {
                         "retentionTimeInDays": 1,
-                        "partitionCount": 4
+                        "partitionCount": "[parameters('d2c_partitions')]"
                     }
                 },
-                "routing": {
-                    "endpoints": {
-                        "serviceBusQueues": [
-                            {
-                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
-                                "name": "ashoksbusendpoint",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "aspeddak-IOT"
-                            },
-                            {
-                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
-                                "name": "finaltestashokendpoint",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "aspeddak-IOT"
-                            },
-                            {
-                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
-                                "name": "ashoksbus23",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "aspeddak-IOT"
-                            }
-                        ],
-                        "serviceBusTopics": [],
-                        "eventHubs": [
-                            {
-                                "connectionString": "[concat('Endpoint=sb://chepra.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_', parameters('IotHubs_ashoktestiothub_name'), ';SharedAccessKey=****;EntityPath=myeventhub')]",
-                                "name": "evenhubendpoint",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "Analytics-Resources"
-                            }
-                        ],
-                        "storageContainers": [
-                            {
-                                "connectionString": "DefaultEndpointsProtocol=https;AccountName=aspeddakiotdiag;AccountKey=****",
-                                "containerName": "ashoktestcontainer",
-                                "fileNameFormat": "{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}",
-                                "batchFrequencyInSeconds": 81,
-                                "maxChunkSizeInBytes": 104857600,
-                                "encoding": "avro",
-                                "name": "ashokstorageendpoint",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "aspeddak-IOT"
-                            },
-                            {
-                                "connectionString": "DefaultEndpointsProtocol=https;AccountName=aspeddakiotdiag;AccountKey=****",
-                                "containerName": "ashoktestcontainer",
-                                "fileNameFormat": "{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}",
-                                "batchFrequencyInSeconds": 100,
-                                "maxChunkSizeInBytes": 104857600,
-                                "encoding": "avro",
-                                "name": "ashstorageendpoint",
-                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
-                                "resourceGroup": "aspeddak-IOT"
-                            }
-                        ]
-                    },
-                    "routes": [
-                        {
-                            "name": "ashoktestroute",
-                            "source": "DeviceMessages",
-                            "condition": "true",
-                            "endpointNames": [
-                                "finaltestashokendpoint"
-                            ],
-                            "isEnabled": true
-                        }
-                    ],
-                    "fallbackRoute": {
-                        "name": "$fallback",
-                        "source": "DeviceMessages",
-                        "condition": "true",
-                        "endpointNames": [
-                            "events"
-                        ],
-                        "isEnabled": true
-                    }
-                },
-                "storageEndpoints": {
-                    "$default": {
-                        "sasTtlAsIso8601": "PT1H",
-                        "connectionString": "[parameters('IotHubs_ashoktestiothub_connectionString')]",
-                        "containerName": "[parameters('IotHubs_ashoktestiothub_containerName')]"
-                    }
-                },
-                "messagingEndpoints": {
-                    "fileNotifications": {
-                        "lockDurationAsIso8601": "PT1M",
-                        "ttlAsIso8601": "PT1H",
-                        "maxDeliveryCount": 10
-                    }
-                },
-                "enableFileUploadNotifications": false,
-                "cloudToDevice": {
-                    "maxDeliveryCount": 10,
-                    "defaultTtlAsIso8601": "PT1H",
-                    "feedback": {
-                        "lockDurationAsIso8601": "PT1M",
-                        "ttlAsIso8601": "PT1H",
-                        "maxDeliveryCount": 10
-                    }
-                },
-                "features": "None"
-            }
+                "features": "[parameters('features')]"
+            },
+            "sku": {
+                "name": "[parameters('sku_name')]",
+                "capacity": "[parameters('sku_units')]"
+            },
+            "tags": "[parameters('tags')]"
+        },
+        {
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "apiVersion": "2017-03-15-preview",
+            "name": "[parameters('hubname')]",
+            "location": "[variables('workspaceRegion')]",
+            "properties": {},
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('hubname'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Security/IoTSecuritySolutions",
+            "apiVersion": "2019-08-01",
+            "name": "[parameters('hubname')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "workspace": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('hubname'))]",
+                "status": "Enabled",
+                "export": [
+                    "RawEvents"
+                ],
+                "disabledDataSources": [],
+                "displayName": "[parameters('hubname')]",
+                "iotHubs": [
+                    "[resourceId('Microsoft.Devices/IotHubs', parameters('hubname'))]"
+                ],
+                "recommendationsConfiguration": [],
+                "unmaskedIpLoggingStatus": "Enabled"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Devices/IotHubs', parameters('hubname'))]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces',  parameters('hubname'))]"
+            ]
         }
     ]
 }
