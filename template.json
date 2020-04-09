@@ -1,0 +1,147 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "IotHubs_ashoktestiothub_connectionString": {
+            "type": "SecureString"
+        },
+        "IotHubs_ashoktestiothub_containerName": {
+            "type": "SecureString"
+        },
+        "IotHubs_ashoktestiothub_name": {
+            "defaultValue": "ashoktestiothub",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "apiVersion": "2019-11-04",
+            "name": "[parameters('IotHubs_ashoktestiothub_name')]",
+            "location": "westus",
+            "tags": {
+                "CreatedBy": "aspeddak@microsoft.com",
+                "CreatedDate": "11/19/2019 4:39:24 AM",
+                "OwningTeam": "IOT",
+                "Reason": "Lab"
+            },
+            "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "capacity": 1
+            },
+            "properties": {
+                "ipFilterRules": [],
+                "eventHubEndpoints": {
+                    "events": {
+                        "retentionTimeInDays": 1,
+                        "partitionCount": 4
+                    }
+                },
+                "routing": {
+                    "endpoints": {
+                        "serviceBusQueues": [
+                            {
+                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
+                                "name": "ashoksbusendpoint",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "aspeddak-IOT"
+                            },
+                            {
+                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
+                                "name": "finaltestashokendpoint",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "aspeddak-IOT"
+                            },
+                            {
+                                "connectionString": "Endpoint=sb://ashokservicebus.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_aspeddak-IOT;SharedAccessKey=****;EntityPath=ashoktestqueue",
+                                "name": "ashoksbus23",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "aspeddak-IOT"
+                            }
+                        ],
+                        "serviceBusTopics": [],
+                        "eventHubs": [
+                            {
+                                "connectionString": "[concat('Endpoint=sb://chepra.servicebus.windows.net:5671/;SharedAccessKeyName=iothubroutes_', parameters('IotHubs_ashoktestiothub_name'), ';SharedAccessKey=****;EntityPath=myeventhub')]",
+                                "name": "evenhubendpoint",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "Analytics-Resources"
+                            }
+                        ],
+                        "storageContainers": [
+                            {
+                                "connectionString": "DefaultEndpointsProtocol=https;AccountName=aspeddakiotdiag;AccountKey=****",
+                                "containerName": "ashoktestcontainer",
+                                "fileNameFormat": "{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}",
+                                "batchFrequencyInSeconds": 81,
+                                "maxChunkSizeInBytes": 104857600,
+                                "encoding": "avro",
+                                "name": "ashokstorageendpoint",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "aspeddak-IOT"
+                            },
+                            {
+                                "connectionString": "DefaultEndpointsProtocol=https;AccountName=aspeddakiotdiag;AccountKey=****",
+                                "containerName": "ashoktestcontainer",
+                                "fileNameFormat": "{iothub}/{partition}/{YYYY}/{MM}/{DD}/{HH}/{mm}",
+                                "batchFrequencyInSeconds": 100,
+                                "maxChunkSizeInBytes": 104857600,
+                                "encoding": "avro",
+                                "name": "ashstorageendpoint",
+                                "subscriptionId": "b83c1ed3-c5b6-44fb-b5ba-2b83a074c23f",
+                                "resourceGroup": "aspeddak-IOT"
+                            }
+                        ]
+                    },
+                    "routes": [
+                        {
+                            "name": "ashoktestroute",
+                            "source": "DeviceMessages",
+                            "condition": "true",
+                            "endpointNames": [
+                                "finaltestashokendpoint"
+                            ],
+                            "isEnabled": true
+                        }
+                    ],
+                    "fallbackRoute": {
+                        "name": "$fallback",
+                        "source": "DeviceMessages",
+                        "condition": "true",
+                        "endpointNames": [
+                            "events"
+                        ],
+                        "isEnabled": true
+                    }
+                },
+                "storageEndpoints": {
+                    "$default": {
+                        "sasTtlAsIso8601": "PT1H",
+                        "connectionString": "[parameters('IotHubs_ashoktestiothub_connectionString')]",
+                        "containerName": "[parameters('IotHubs_ashoktestiothub_containerName')]"
+                    }
+                },
+                "messagingEndpoints": {
+                    "fileNotifications": {
+                        "lockDurationAsIso8601": "PT1M",
+                        "ttlAsIso8601": "PT1H",
+                        "maxDeliveryCount": 10
+                    }
+                },
+                "enableFileUploadNotifications": false,
+                "cloudToDevice": {
+                    "maxDeliveryCount": 10,
+                    "defaultTtlAsIso8601": "PT1H",
+                    "feedback": {
+                        "lockDurationAsIso8601": "PT1M",
+                        "ttlAsIso8601": "PT1H",
+                        "maxDeliveryCount": 10
+                    }
+                },
+                "features": "None"
+            }
+        }
+    ]
+}
